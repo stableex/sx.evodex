@@ -109,4 +109,47 @@ namespace evodex {
             pair<asset, asset>{ pool.pool2.quantity, pool.pool1.quantity };
     }
 
+    /**
+     * ## STATIC `get_amount_out`
+     *
+     * Given an input amount of an asset and pair reserves, returns the output amount of the other asset
+     * source: https://github.com/EOSArgentina/evolutiondex/blob/master/evolutiondex.cpp#L165
+     *
+     * ### params
+     *
+     * - `{uint64_t} amount_in` - amount input
+     * - `{uint64_t} reserve_in` - reserve input
+     * - `{uint64_t} reserve_out` - reserve output
+     * - `{uint64_t} fee` - trading fee (pips 1/10000)
+     *
+     * ### example
+     *
+     * ```c++
+     * // Inputs
+     * const uint64_t amount_in = 10000;
+     * const uint64_t reserve_in = 45851931234;
+     * const uint64_t reserve_out = 46851931234;
+     * const uint64_t fee = 5;
+     *
+     * // Calculation
+     * const uint64_t amount_out = evodex::get_amount_out( amount_in, reserve_in, reserve_out, fee );
+     * // => 9996
+     * ```
+     */
+    static uint64_t get_amount_out( const uint64_t amount_in, const uint64_t reserve_in, const uint64_t reserve_out,  const uint64_t fee )
+    {
+        // checks
+        eosio::check(amount_in > 0, "sx.evodex: INSUFFICIENT_INPUT_AMOUNT");
+        eosio::check(reserve_in > 0 && reserve_out > 0, "sx.evodex: INSUFFICIENT_LIQUIDITY");
+
+        int128_t am_in = -int128_t(amount_in);
+        int128_t res_in = (int128_t)reserve_in + (int128_t)amount_in;
+
+        int128_t tmp = am_in * reserve_out / res_in;
+        int128_t tmp_fee = (-tmp * fee + 9999)/10000;
+        tmp += tmp_fee;
+
+        return -tmp;
+    }
+
 }

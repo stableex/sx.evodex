@@ -91,7 +91,7 @@ namespace evodex {
         auto fee = (9999 + am_out * row.fee)/10000;
         am_out -= fee;
 
-        check(am_out > 0, "EvodexLibrary: invalid return");
+        check(am_out >= 0, "EvodexLibrary: invalid return");
 
         return asset { am_out, out_sym };
     }
